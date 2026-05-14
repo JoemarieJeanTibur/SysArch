@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\TT538\\source\\repos\\Tibur_LabAct1\\Tibur_LabAct1\\Tibur_LabAct1.csproj": {}
+    "C:\\Users\\joema\\source\\repos\\SysArch\\Tibur_LabAct1.csproj": {}
   },
   "projects": {
-    "C:\\Users\\TT538\\source\\repos\\Tibur_LabAct1\\Tibur_LabAct1\\Tibur_LabAct1.csproj": {
+    "C:\\Users\\joema\\source\\repos\\SysArch\\Tibur_LabAct1.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\TT538\\source\\repos\\Tibur_LabAct1\\Tibur_LabAct1\\Tibur_LabAct1.csproj",
+        "projectUniqueName": "C:\\Users\\joema\\source\\repos\\SysArch\\Tibur_LabAct1.csproj",
         "projectName": "Tibur_LabAct1",
-        "projectPath": "C:\\Users\\TT538\\source\\repos\\Tibur_LabAct1\\Tibur_LabAct1\\Tibur_LabAct1.csproj",
-        "packagesPath": "C:\\Users\\TT538\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\TT538\\source\\repos\\Tibur_LabAct1\\Tibur_LabAct1\\obj\\",
+        "projectPath": "C:\\Users\\joema\\source\\repos\\SysArch\\Tibur_LabAct1.csproj",
+        "packagesPath": "C:\\Users\\joema\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\joema\\source\\repos\\SysArch\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\TT538\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\joema\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -26,7 +26,6 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -45,7 +44,7 @@
           "auditLevel": "low",
           "auditMode": "all"
         },
-        "SdkAnalysisLevel": "10.0.100"
+        "SdkAnalysisLevel": "10.0.200"
       },
       "frameworks": {
         "net10.0": {
@@ -85,7 +84,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.102/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.203/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.AspNetCore": "(,10.0.32767]",
             "Microsoft.AspNetCore.Antiforgery": "(,10.0.32767]",

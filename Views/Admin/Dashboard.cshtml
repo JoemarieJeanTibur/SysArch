@@ -33,10 +33,12 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            height: 52px;
+            min-height: 52px;
             position: sticky;
             top: 0;
             z-index: 100;
+            gap: 18px;
+            overflow: visible;
         }
 
             .admin-navbar .brand {
@@ -54,7 +56,7 @@
                 margin: 0;
                 padding: 0;
                 flex-wrap: nowrap;
-                overflow-x: auto;
+                overflow: visible;
             }
 
                 .admin-navbar .nav-links a {
@@ -71,6 +73,12 @@
                         background: rgba(255,255,255,0.12);
                         color: #fff;
                     }
+
+                .admin-navbar .nav-links a.active,
+                .admin-navbar .nav-dropdown > a.active {
+                    background: rgba(255,255,255,0.18);
+                    color: #fff;
+                }
 
             .admin-navbar .btn-nav-logout {
                 background-color: #f5a623;
@@ -92,6 +100,12 @@
 
         .content-wrapper {
             padding: 24px 30px 30px 30px;
+        }
+
+        .dashboard-wrapper {
+            min-height: calc(100vh - 60px);
+            margin-left: calc(50% - 50vw);
+            width: 100vw;
         }
 
         .dashboard-header {
@@ -419,6 +433,68 @@
             font-size: 0.78rem;
             font-weight: 600;
         }
+
+        .nav-dropdown {
+            position: relative;
+        }
+
+        .dropdown-menu-nav {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: #2e1f6b;
+            list-style: none;
+            padding: 6px 0;
+            margin: 0;
+            border-radius: 6px;
+            min-width: 160px;
+            z-index: 999;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+            .dropdown-menu-nav li a {
+                display: block;
+                padding: 8px 16px !important;
+                color: #d0d8e8 !important;
+                font-size: 0.82rem;
+                white-space: nowrap;
+            }
+
+                .dropdown-menu-nav li a:hover {
+                    background: rgba(255,255,255,0.12);
+                    color: #fff !important;
+                }
+
+            .dropdown-menu-nav.open {
+                display: block;
+            }
+
+        @@media (max-width: 900px) {
+            .admin-navbar {
+                align-items: flex-start;
+                flex-direction: column;
+                padding: 12px 16px;
+            }
+
+                .admin-navbar .nav-links {
+                    width: 100%;
+                    flex-wrap: wrap;
+                    gap: 6px;
+                }
+
+                    .admin-navbar .nav-links a,
+                    .admin-navbar .btn-nav-logout {
+                        display: inline-flex;
+                        align-items: center;
+                        min-height: 34px;
+                    }
+
+            .dropdown-menu-nav {
+                left: auto;
+                right: 0;
+            }
+        }
     </style>
 }
 
@@ -428,14 +504,22 @@
     <nav class="admin-navbar">
         <span class="brand">College of Computer Studies Admin</span>
         <ul class="nav-links">
-            <li><a href="#" onclick="showSection('home', this)">Home</a></li>
-            <li><a href="#" onclick="showSection('search', this)">Search</a></li>
-            <li><a href="#" onclick="showSection('students', this)">Student List</a></li>
-            <li><a href="#" onclick="showSection('sitin', this)">Sit-in</a></li>
-            <li><a href="#" onclick="showSection('records', this)">Sit-in Records</a></li>
-            <li><a href="#" onclick="showSection('current', this)">Sit-in Reports</a></li>
-            <li><a href="#" onclick="showSection('feedback', this)">Feedback Reports</a></li>
-            <li><a href="#" onclick="showSection('reservation', this)">Reservation</a></li>
+            <li><a href="#" onclick="return showSection('home', this)">Home</a></li>
+            <li><a href="#" onclick="return showSection('search', this)">Search</a></li>
+            <li><a href="#" onclick="return showSection('students', this)">Student List</a></li>
+            <li><a href="#" onclick="return showSection('sitin', this)">Sit-in</a></li>
+
+            <!-- Records Dropdown -->
+            <li class="nav-dropdown">
+                <a href="#" onclick="toggleDropdown(event, 'recordsDropdown')">Records ▾</a>
+                <ul class="dropdown-menu-nav" id="recordsDropdown">
+                    <li><a href="#" onclick="return showSection('records', this)">Sit-in Records</a></li>
+                    <li><a href="#" onclick="return showSection('current', this)">Sit-in Reports</a></li>
+                    <li><a href="#" onclick="return showSection('feedback', this)">Feedback Reports</a></li>
+                    <li><a href="#" onclick="return showSection('reservation', this)">Reservation</a></li>
+                </ul>
+            </li>
+
             <li>
                 <button type="button" class="btn-nav-logout" onclick="window.location.href='/Account/Login'">Log out</button>
             </li>
@@ -663,7 +747,15 @@
                             </div>
                             <div>
                                 <label class="form-label">Lab</label>
-                                <input type="text" name="Lab" class="form-input" placeholder="e.g. Lab 1, Lab 2" required />
+                                <select name="Lab" class="form-input" required>
+                                    <option value="">Select lab</option>
+                                    <option value="Lab 524">Lab 524</option>
+                                    <option value="Lab 526">Lab 526</option>
+                                    <option value="Lab 528">Lab 528</option>
+                                    <option value="Lab 530">Lab 530</option>
+                                    <option value="Lab 542">Lab 542</option>
+                                    <option value="Lab 544">Lab 544</option>
+                                </select>
                             </div>
                         </div>
                         <button type="submit" class="btn-sitin" style="padding:10px 30px;font-size:0.95rem;">
@@ -882,10 +974,50 @@
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
+
+
         function showSection(id, el) {
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
+            document.querySelectorAll('.admin-navbar a').forEach(a => a.classList.remove('active'));
+            if (el) {
+                el.classList.add('active');
+                var parentDropdown = el.closest('.nav-dropdown');
+                if (parentDropdown) {
+                    parentDropdown.querySelector(':scope > a').classList.add('active');
+                }
+            }
+            closeDropdown();
+            return false;
         }
+
+        function toggleDropdown(event, dropdownId) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            var dropdown = document.getElementById(dropdownId);
+            var isOpen = dropdown.classList.contains('open');
+            closeDropdown();
+
+            if (!isOpen) {
+                dropdown.classList.add('open');
+                event.currentTarget.classList.add('active');
+            }
+
+            return false;
+        }
+
+        function closeDropdown() {
+            document.querySelectorAll('.dropdown-menu-nav').forEach(menu => menu.classList.remove('open'));
+            document.querySelectorAll('.admin-navbar .nav-dropdown > a').forEach(link => {
+                var activeSection = document.querySelector('.dropdown-menu-nav a.active');
+                if (!activeSection || !link.parentElement.contains(activeSection)) {
+                    link.classList.remove('active');
+                }
+            });
+        }
+
+        document.addEventListener('click', closeDropdown);
 
         function toggleAnnouncementForm() {
             var form = document.getElementById('announcementForm');

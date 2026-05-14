@@ -21,11 +21,13 @@
             display: flex;
             align-items: center;
             padding: 0 30px;
-            height: 52px;
+            min-height: 52px;
             box-shadow: 0 2px 6px rgba(0,0,0,0.15);
             position: sticky;
             top: 0;
             z-index: 100;
+            margin-left: calc(50% - 50vw);
+            width: 100vw;
         }
 
         .topnav-brand {
@@ -67,6 +69,8 @@
 
         .page-section {
             display: none;
+            margin-left: calc(50% - 50vw);
+            width: 100vw;
         }
 
             .page-section.active {
@@ -76,8 +80,8 @@
         .dashboard-wrapper {
             padding: 30px;
             display: grid;
-            grid-template-columns: 280px 1fr;
-            gap: 20px;
+            grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
+            gap: 24px;
         }
 
         .student-info-card,
@@ -102,6 +106,13 @@
             padding: 20px;
         }
 
+        .avatar-image {
+            width: 112px;
+            height: 112px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
         .avatar-placeholder {
             width: 100px;
             height: 100px;
@@ -114,6 +125,32 @@
             font-size: 2rem;
             margin: auto;
         }
+
+        .profile-upload-form {
+            margin-top: 14px;
+            display: grid;
+            gap: 10px;
+        }
+
+        .profile-file-input {
+            display: none;
+        }
+
+        .profile-edit-btn {
+            background: #3d2b7d;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 12px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-block;
+        }
+
+            .profile-edit-btn:hover {
+                background: #2e1f6b;
+            }
 
         .student-details {
             padding: 16px 20px;
@@ -402,6 +439,43 @@
             font-size: 0.78rem;
             font-weight: 600;
         }
+
+        @@media (max-width: 900px) {
+            .topnav {
+                align-items: flex-start;
+                flex-direction: column;
+                padding: 12px 16px;
+            }
+
+            .topnav-brand {
+                margin-right: 0;
+            }
+
+            .topnav-links {
+                width: 100%;
+                flex-wrap: wrap;
+                overflow-x: visible;
+            }
+
+            .topnav-link {
+                height: 36px;
+                padding: 0 10px;
+            }
+
+            .dashboard-wrapper {
+                grid-template-columns: 1fr;
+                padding: 20px 16px;
+            }
+
+            .placeholder-wrapper {
+                padding: 20px 16px;
+            }
+
+            .analytics-row,
+            .res-form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 }
 
@@ -430,14 +504,45 @@
                     @if (student?.ProfilePicture != null)
                     {
                         <img src="@student.ProfilePicture"
-                             style="width:100px;height:100px;border-radius:50%;object-fit:cover;" />
+                             class="avatar-image"
+                             id="profilePreview"
+                             alt="Profile picture" />
+                        <div class="avatar-placeholder" id="profilePlaceholder" style="display:none;">🎓</div>
                     }
                     else
                     {
-                        <div class="avatar-placeholder">🎓</div>
+                        <img src=""
+                             class="avatar-image"
+                             id="profilePreview"
+                             alt="Profile picture preview"
+                             style="display:none;" />
+                        <div class="avatar-placeholder" id="profilePlaceholder">🎓</div>
                     }
+                    <form asp-controller="Account"
+                          asp-action="UpdateProfilePicture"
+                          method="post"
+                          enctype="multipart/form-data"
+                          id="profilePictureForm"
+                          class="profile-upload-form">
+                        @Html.AntiForgeryToken()
+                        <input type="file"
+                               name="ProfilePicture"
+                               class="profile-file-input"
+                               id="profilePictureInput"
+                               accept="image/*"
+                               required />
+                        <label for="profilePictureInput" class="profile-edit-btn">Edit Profile</label>
+                    </form>
                 </div>
                 <div class="student-details">
+                    @if (TempData["ProfileSuccess"] != null)
+                    {
+                        <div class="alert-success">@TempData["ProfileSuccess"]</div>
+                    }
+                    @if (TempData["ProfileError"] != null)
+                    {
+                        <div class="alert-error">@TempData["ProfileError"]</div>
+                    }
                     <div class="detail-row">
                         <span class="detail-label">Name:</span>
                         <span>@student?.FirstName @student?.LastName</span>
@@ -794,4 +899,22 @@
         document.getElementById(id).classList.add('active');
         el.classList.add('active');
     }
+
+    const profilePictureInput = document.getElementById('profilePictureInput');
+    const profilePreview = document.getElementById('profilePreview');
+    const profilePlaceholder = document.getElementById('profilePlaceholder');
+    const profilePictureForm = document.getElementById('profilePictureForm');
+
+    profilePictureInput?.addEventListener('change', function () {
+        const file = this.files?.[0];
+        if (!file) return;
+
+        profilePreview.src = URL.createObjectURL(file);
+        profilePreview.style.display = 'inline-block';
+        if (profilePlaceholder) {
+            profilePlaceholder.style.display = 'none';
+        }
+
+        profilePictureForm.submit();
+    });
 </script>

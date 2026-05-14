@@ -56,6 +56,14 @@ namespace Tibur_LabAct1.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult RegisterSitin(string IdNumber, string Name, string Purpose, string Lab)
         {
+            var allowedLabs = new[] { "Lab 524", "Lab 526", "Lab 528", "Lab 530", "Lab 542", "Lab 544" };
+
+            if (!allowedLabs.Contains(Lab))
+            {
+                TempData["SitinError"] = "Please select a valid lab.";
+                return RedirectToAction("Dashboard");
+            }
+
             var student = _context.Students.FirstOrDefault(s => s.IdNumber == IdNumber);
 
             if (student == null)

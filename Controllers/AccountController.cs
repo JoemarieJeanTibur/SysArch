@@ -7,10 +7,12 @@ namespace Tibur_LabAct1.Controllers
     public class AccountController : Controller
     {
         private readonly AppDbContext _context;
+        private readonly IWebHostEnvironment _environment;
 
-        public AccountController(AppDbContext context)
+        public AccountController(AppDbContext context, IWebHostEnvironment environment)
         {
             _context = context;
+            _environment = environment;
         }
 
         [HttpGet]
@@ -87,6 +89,59 @@ namespace Tibur_LabAct1.Controllers
                 .ToList();
 
             return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateProfilePicture(IFormFile ProfilePicture)
+        {
+            var studentId = HttpContext.Session.GetString("User");
+
+            if (string.IsNullOrEmpty(studentId))
+                return RedirectToAction("Login");
+
+            if (ProfilePicture == null || ProfilePicture.Length == 0)
+            {
+                TempData["ProfileError"] = "Please select an image to upload.";
+                return RedirectToAction("StudentProfile");
+            }
+
+            if (!ProfilePicture.ContentType.StartsWith("image/"))
+            {
+                TempData["ProfileError"] = "Profile picture must be an image file.";
+                return RedirectToAction("StudentProfile");
+            }
+
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp", ".jfif" };
+            var extension = Path.GetExtension(ProfilePicture.FileName).ToLowerInvariant();
+
+            if (!allowedExtensions.Contains(extension))
+            {
+                TempData["ProfileError"] = "Please upload a JPG, PNG, GIF, WEBP, or JFIF image.";
+                return RedirectToAction("StudentProfile");
+            }
+
+            var user = _context.Students.FirstOrDefault(u => u.IdNumber == studentId);
+
+            if (user == null)
+                return RedirectToAction("Login");
+
+            var uploadsFolder = Path.Combine(_environment.WebRootPath, "uploads");
+            Directory.CreateDirectory(uploadsFolder);
+
+            var fileName = $"{Guid.NewGuid()}{extension}";
+            var filePath = Path.Combine(uploadsFolder, fileName);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await ProfilePicture.CopyToAsync(stream);
+            }
+
+            user.ProfilePicture = $"/uploads/{fileName}";
+            _context.SaveChanges();
+
+            TempData["ProfileSuccess"] = "Profile picture updated.";
+            return RedirectToAction("StudentProfile");
         }
 
         [HttpPost]
