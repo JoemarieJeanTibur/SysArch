@@ -1,0 +1,955 @@
+﻿@{
+    ViewData["Title"] = "Admin Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var students = ViewBag.Students as List<Tibur_LabAct1.Models.User> ?? new List<Tibur_LabAct1.Models.User>();
+    var currentSitins = ViewBag.CurrentSitins as List<Tibur_LabAct1.Models.SitIn> ?? new List<Tibur_LabAct1.Models.SitIn>();
+    var allRecords = ViewBag.AllRecords as List<Tibur_LabAct1.Models.SitIn> ?? new List<Tibur_LabAct1.Models.SitIn>();
+    var announcements = ViewBag.Announcements as List<Tibur_LabAct1.Models.Announcement> ?? new List<Tibur_LabAct1.Models.Announcement>();
+    var feedbacks = ViewBag.Feedbacks as List<Tibur_LabAct1.Models.Feedback> ?? new List<Tibur_LabAct1.Models.Feedback>();
+    var reservations = ViewBag.Reservations as List<Tibur_LabAct1.Models.Reservation> ?? new List<Tibur_LabAct1.Models.Reservation>();
+}
+
+@section Styles {
+    <style>
+        body {
+            background-color: #f4f6f9;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type=number] {
+            -moz-appearance: textfield;
+            appearance: textfield;
+        }
+
+        .admin-navbar {
+            background-color: #3d2b7d;
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 52px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+            .admin-navbar .brand {
+                color: #fff;
+                font-weight: 700;
+                font-size: 1rem;
+                white-space: nowrap;
+            }
+
+            .admin-navbar .nav-links {
+                display: flex;
+                gap: 2px;
+                align-items: center;
+                list-style: none;
+                margin: 0;
+                padding: 0;
+                flex-wrap: nowrap;
+                overflow-x: auto;
+            }
+
+                .admin-navbar .nav-links a {
+                    color: #d0d8e8;
+                    text-decoration: none;
+                    padding: 6px 10px;
+                    border-radius: 4px;
+                    font-size: 0.82rem;
+                    white-space: nowrap;
+                    transition: background 0.2s, color 0.2s;
+                }
+
+                    .admin-navbar .nav-links a:hover {
+                        background: rgba(255,255,255,0.12);
+                        color: #fff;
+                    }
+
+            .admin-navbar .btn-nav-logout {
+                background-color: #f5a623;
+                color: #fff;
+                border: none;
+                padding: 6px 16px;
+                border-radius: 4px;
+                font-size: 0.85rem;
+                font-weight: 700;
+                cursor: pointer;
+                -webkit-appearance: none;
+                appearance: none;
+                white-space: nowrap;
+            }
+
+                .admin-navbar .btn-nav-logout:hover {
+                    background-color: #d4891a;
+                }
+
+        .content-wrapper {
+            padding: 24px 30px 30px 30px;
+        }
+
+        .dashboard-header {
+            background: linear-gradient(135deg, #3d2b7d, #6a4fc9);
+            color: #fff;
+            border-radius: 12px;
+            padding: 28px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 28px;
+        }
+
+            .dashboard-header h2 {
+                margin: 0;
+                font-size: 1.8rem;
+                font-weight: 700;
+            }
+
+            .dashboard-header p {
+                margin: 6px 0 0;
+                opacity: 0.85;
+                font-size: 0.95rem;
+            }
+
+        .admin-card {
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+
+        .admin-card-header {
+            background-color: #3d2b7d;
+            color: #fff;
+            padding: 14px 20px;
+            font-weight: 700;
+            font-size: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .admin-card-body {
+            padding: 20px;
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+            .search-bar input {
+                flex: 1;
+                padding: 10px 14px;
+                border: 1px solid #ccc;
+                border-radius: 6px;
+                font-size: 0.9rem;
+            }
+
+                .search-bar input:focus {
+                    border-color: #3d2b7d;
+                    outline: none;
+                    box-shadow: 0 0 0 3px rgba(61,43,125,0.15);
+                }
+
+        .btn-search {
+            background: #3d2b7d;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+            .btn-search:hover {
+                background: #2e1f6b;
+            }
+
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+            .admin-table th {
+                background: #f0ecff;
+                color: #3d2b7d;
+                padding: 12px 14px;
+                text-align: left;
+                font-weight: 700;
+            }
+
+            .admin-table td {
+                padding: 12px 14px;
+                border-bottom: 1px solid #f0f0f0;
+                color: #333;
+            }
+
+            .admin-table tr:hover td {
+                background: #faf9ff;
+            }
+
+        .badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            font-weight: 600;
+        }
+
+        .badge-active {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-done {
+            background: #f0ecff;
+            color: #3d2b7d;
+        }
+
+        .btn-sitin {
+            background: #3d2b7d;
+            color: #fff;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 5px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+            .btn-sitin:hover {
+                background: #2e1f6b;
+            }
+
+        .btn-end {
+            background: #c0392b;
+            color: #fff;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 5px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+            .btn-end:hover {
+                background: #962d22;
+            }
+
+        .section {
+            display: none;
+        }
+
+            .section.active {
+                display: block;
+            }
+
+        .form-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            margin-top: 4px;
+            font-size: 0.9rem;
+            box-sizing: border-box;
+        }
+
+            .form-input:focus {
+                border-color: #3d2b7d;
+                outline: none;
+                box-shadow: 0 0 0 3px rgba(61,43,125,0.15);
+            }
+
+        .form-label {
+            font-size: 0.85rem;
+            color: #555;
+            font-weight: 600;
+        }
+
+        .btn-edit-student {
+            background-color: #007bff;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 4px;
+            text-decoration: none;
+            margin-right: 4px;
+            font-size: 13px;
+        }
+
+        .btn-delete-student {
+            background-color: #dc3545;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+        .btn-edit-student:hover {
+            background-color: #0056b3;
+            color: white;
+        }
+
+        .btn-delete-student:hover {
+            background-color: #a71d2a;
+            color: white;
+        }
+
+        .announcement-form-panel {
+            display: none;
+            margin-bottom: 20px;
+            padding: 18px 20px;
+            background: #f9f7ff;
+            border-radius: 8px;
+            border: 1px solid #e0d9f7;
+        }
+
+            .announcement-form-panel h6 {
+                color: #3d2b7d;
+                font-weight: 700;
+                margin: 0 0 14px 0;
+                font-size: 0.95rem;
+            }
+
+        .btn-cancel {
+            padding: 9px 24px;
+            background: #aaa;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.82rem;
+        }
+
+            .btn-cancel:hover {
+                background: #888;
+            }
+
+        .announcement-item {
+            padding: 14px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+            .announcement-item:last-child {
+                border-bottom: none;
+            }
+
+            .announcement-item .ann-title {
+                font-weight: 700;
+                color: #3d2b7d;
+                font-size: 0.95rem;
+                margin-bottom: 4px;
+            }
+
+            .announcement-item .ann-content {
+                color: #555;
+                font-size: 0.88rem;
+                margin-bottom: 6px;
+                line-height: 1.5;
+            }
+
+            .announcement-item .ann-meta {
+                font-size: 0.78rem;
+                color: #aaa;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 28px;
+        }
+
+        .stat-summary-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 0.9rem;
+            color: #444;
+        }
+
+            .stat-summary-item:last-child {
+                border-bottom: none;
+            }
+
+            .stat-summary-item span:last-child {
+                font-weight: 700;
+                color: #3d2b7d;
+                font-size: 1rem;
+            }
+
+        .reservation-badge-pending {
+            background: #fff3cd;
+            color: #856404;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            font-weight: 600;
+        }
+
+        .reservation-badge-approved {
+            background: #d4edda;
+            color: #155724;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            font-weight: 600;
+        }
+
+        .reservation-badge-rejected {
+            background: #fdecea;
+            color: #c0392b;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            font-weight: 600;
+        }
+    </style>
+}
+
+<div class="dashboard-wrapper">
+
+    <!-- Navbar -->
+    <nav class="admin-navbar">
+        <span class="brand">College of Computer Studies Admin</span>
+        <ul class="nav-links">
+            <li><a href="#" onclick="showSection('home', this)">Home</a></li>
+            <li><a href="#" onclick="showSection('search', this)">Search</a></li>
+            <li><a href="#" onclick="showSection('students', this)">Student List</a></li>
+            <li><a href="#" onclick="showSection('sitin', this)">Sit-in</a></li>
+            <li><a href="#" onclick="showSection('records', this)">Sit-in Records</a></li>
+            <li><a href="#" onclick="showSection('current', this)">Sit-in Reports</a></li>
+            <li><a href="#" onclick="showSection('feedback', this)">Feedback Reports</a></li>
+            <li><a href="#" onclick="showSection('reservation', this)">Reservation</a></li>
+            <li>
+                <button type="button" class="btn-nav-logout" onclick="window.location.href='/Account/Login'">Log out</button>
+            </li>
+        </ul>
+    </nav>
+
+    <div class="content-wrapper">
+
+        <div class="dashboard-header">
+            <div>
+                <h2>Welcome, Admin</h2>
+                <p>College of Computer Studies Sit-in Monitoring System</p>
+            </div>
+        </div>
+
+        <!-- HOME -->
+        <div id="home" class="section active">
+            <div class="stats-grid">
+
+                <div class="admin-card">
+                    <div class="admin-card-header">📊 Statistics</div>
+                    <div class="admin-card-body">
+                        <div class="stat-summary-item">
+                            <span>Students Registered</span>
+                            <span>@students.Count</span>
+                        </div>
+                        <div class="stat-summary-item">
+                            <span>Currently Sit-in</span>
+                            <span>@currentSitins.Count</span>
+                        </div>
+                        <div class="stat-summary-item">
+                            <span>Total Sit-in Records</span>
+                            <span>@allRecords.Count</span>
+                        </div>
+                        <div class="stat-summary-item">
+                            <span>Total Feedback</span>
+                            <span>@feedbacks.Count</span>
+                        </div>
+                        <div style="margin-top:20px;">
+                            <canvas id="purposeChart" height="220"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="admin-card">
+                    <div class="admin-card-header">
+                        <span>📢 Announcements</span>
+                        <button class="btn-sitin" onclick="toggleAnnouncementForm()">+ New</button>
+                    </div>
+                    <div class="admin-card-body">
+
+                        @if (TempData["AnnouncementSuccess"] != null)
+                        {
+                            <div style="background:#d4edda;color:#155724;padding:10px 14px;border-radius:6px;margin-bottom:14px;font-weight:600;">
+                                ✅ @TempData["AnnouncementSuccess"]
+                            </div>
+                        }
+                        @if (TempData["AnnouncementError"] != null)
+                        {
+                            <div style="background:#fdecea;color:#c0392b;padding:10px 14px;border-radius:6px;margin-bottom:14px;font-weight:600;">
+                                ❌ @TempData["AnnouncementError"]
+                            </div>
+                        }
+
+                        <div id="announcementForm" class="announcement-form-panel">
+                            <h6>Create New Announcement</h6>
+                            <form method="post" action="/Admin/CreateAnnouncement">
+                                @Html.AntiForgeryToken()
+                                <div style="margin-bottom:12px;">
+                                    <label class="form-label">Title</label>
+                                    <input type="text" name="Title" class="form-input" placeholder="Announcement title" required />
+                                </div>
+                                <div style="margin-bottom:14px;">
+                                    <label class="form-label">Content</label>
+                                    <textarea name="Content" class="form-input" rows="3"
+                                              placeholder="Write your announcement here..."
+                                              required style="resize:vertical;"></textarea>
+                                </div>
+                                <div style="display:flex;gap:10px;">
+                                    <button type="submit" class="btn-sitin" style="padding:9px 24px;font-size:0.88rem;">Post Announcement</button>
+                                    <button type="button" class="btn-cancel" onclick="toggleAnnouncementForm()">Cancel</button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div style="max-height:340px;overflow-y:auto;">
+                            @if (announcements.Any())
+                            {
+                                foreach (var a in announcements)
+                                {
+                                    <div class="announcement-item">
+                                        <div class="ann-title">@a.Title</div>
+                                        <div class="ann-content">@a.Content</div>
+                                        <div class="ann-meta">
+                                            <span>🕒 @a.DatePosted.ToString("MMMM dd, yyyy hh:mm tt")</span>
+                                            <a href="/Admin/DeleteAnnouncement/@a.Id"
+                                               class="btn-delete-student"
+                                               style="font-size:0.78rem;padding:4px 10px;"
+                                               onclick="return confirm('Delete this announcement?')">Delete</a>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <div style="text-align:center;color:#aaa;padding:30px 0;font-size:0.9rem;">
+                                    No announcements yet. Click <strong>+ New</strong> to create one.
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- SEARCH -->
+        <div id="search" class="section">
+            <div class="admin-card">
+                <div class="admin-card-header">Search Student</div>
+                <div class="admin-card-body">
+                    <div class="search-bar">
+                        <input type="text" id="searchInput" placeholder="Enter ID Number or Name..." />
+                        <button class="btn-search" onclick="searchStudent()">Search</button>
+                    </div>
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>ID Number</th>
+                                <th>Name</th>
+                                <th>Course</th>
+                                <th>Year</th>
+                                <th>Email</th>
+                                <th>Address</th>
+                                <th>Sessions Left</th>
+                            </tr>
+                        </thead>
+                        <tbody id="searchResults">
+                            <tr>
+                                <td colspan="7" style="text-align:center;color:#aaa;">Search a student to see results</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- STUDENTS -->
+        <div id="students" class="section">
+            <div class="admin-card">
+                <div class="admin-card-header">Students List</div>
+                <div class="admin-card-body">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>ID Number</th>
+                                <th>Name</th>
+                                <th>Year Level</th>
+                                <th>Course</th>
+                                <th>Sessions Left</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (students.Any())
+                            {
+                                foreach (var s in students)
+                                {
+                                    <tr>
+                                        <td>@s.IdNumber</td>
+                                        <td>@s.FirstName @s.LastName</td>
+                                        <td>@s.CourseLvl</td>
+                                        <td>@s.Course</td>
+                                        <td>@s.RemainingSession</td>
+                                        <td>
+                                            <a href="/Admin/EditStudent/@s.IdNumber" class="btn-edit-student">Edit</a>
+                                            <a href="/Admin/DeleteStudent/@s.IdNumber"
+                                               class="btn-delete-student"
+                                               onclick="return confirm('Delete this student?')">Delete</a>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr><td colspan="6" style="text-align:center;color:#aaa;">No students yet</td></tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- SIT-IN REGISTRATION -->
+        <div id="sitin" class="section">
+            <div class="admin-card">
+                <div class="admin-card-header">Sit-in Registration</div>
+                <div class="admin-card-body">
+                    @if (TempData["SitinSuccess"] != null)
+                    {
+                        <div style="background:#d4edda;color:#155724;padding:10px 14px;border-radius:6px;margin-bottom:16px;font-weight:600;">
+                            ✅ @TempData["SitinSuccess"]
+                        </div>
+                    }
+                    @if (TempData["SitinError"] != null)
+                    {
+                        <div style="background:#fdecea;color:#c0392b;padding:10px 14px;border-radius:6px;margin-bottom:16px;font-weight:600;">
+                            ❌ @TempData["SitinError"]
+                        </div>
+                    }
+                    <form method="post" action="/Admin/RegisterSitin">
+                        @Html.AntiForgeryToken()
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+                            <div>
+                                <label class="form-label">ID Number</label>
+                                <input type="text" name="IdNumber" class="form-input" placeholder="Enter student ID" required />
+                            </div>
+                            <div>
+                                <label class="form-label">Full Name</label>
+                                <input type="text" name="Name" class="form-input" placeholder="Enter student name" required />
+                            </div>
+                            <div>
+                                <label class="form-label">Purpose</label>
+                                <input type="text" name="Purpose" class="form-input" placeholder="e.g. C#, Java, PHP" required />
+                            </div>
+                            <div>
+                                <label class="form-label">Lab</label>
+                                <input type="text" name="Lab" class="form-input" placeholder="e.g. Lab 1, Lab 2" required />
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-sitin" style="padding:10px 30px;font-size:0.95rem;">
+                            Register Sit-in
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- SIT-IN REPORTS (CURRENT) -->
+        <div id="current" class="section">
+            <div class="admin-card">
+                <div class="admin-card-header">Current Sit-in</div>
+                <div class="admin-card-body">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>ID Number</th>
+                                <th>Name</th>
+                                <th>Lab</th>
+                                <th>Purpose</th>
+                                <th>Time In</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (currentSitins.Any())
+                            {
+                                foreach (var s in currentSitins)
+                                {
+                                    <tr>
+                                        <td>@s.IdNumber</td>
+                                        <td>@s.Name</td>
+                                        <td>@s.Lab</td>
+                                        <td>@s.Purpose</td>
+                                        <td>@s.TimeIn.ToString("MM/dd/yyyy hh:mm tt")</td>
+                                        <td><span class="badge badge-active">Active</span></td>
+                                        <td>
+                                            <form method="post" action="/Admin/EndSitin" style="display:inline;">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@s.Id" />
+                                                <button type="submit" class="btn-end">End</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr><td colspan="7" style="text-align:center;color:#aaa;">No active sit-ins</td></tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- SIT-IN RECORDS -->
+        <div id="records" class="section">
+            <div class="admin-card">
+                <div class="admin-card-header">Sit-in Records</div>
+                <div class="admin-card-body">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>ID Number</th>
+                                <th>Name</th>
+                                <th>Lab</th>
+                                <th>Purpose</th>
+                                <th>Time In</th>
+                                <th>Time Out</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (allRecords.Any())
+                            {
+                                foreach (var s in allRecords)
+                                {
+                                    <tr>
+                                        <td>@s.IdNumber</td>
+                                        <td>@s.Name</td>
+                                        <td>@s.Lab</td>
+                                        <td>@s.Purpose</td>
+                                        <td>@s.TimeIn.ToString("MM/dd/yyyy hh:mm tt")</td>
+                                        <td>@(s.TimeOut.HasValue? s.TimeOut.Value.ToString("MM/dd/yyyy hh:mm tt") : "-")</td>
+                                        <td>
+                                            <span class="badge @(s.Status == "Active" ? "badge-active" : "badge-done")">
+                                                @s.Status
+                                            </span>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr><td colspan="7" style="text-align:center;color:#aaa;">No records yet</td></tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- FEEDBACK REPORTS -->
+        <div id="feedback" class="section">
+            <div class="admin-card">
+                <div class="admin-card-header">Feedback Reports</div>
+                <div class="admin-card-body">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>ID Number</th>
+                                <th>Name</th>
+                                <th>Feedback</th>
+                                <th>Date Submitted</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (feedbacks.Any())
+                            {
+                                foreach (var f in feedbacks)
+                                {
+                                    <tr>
+                                        <td>@f.IdNumber</td>
+                                        <td>@f.Name</td>
+                                        <td>@f.Message</td>
+                                        <td>@f.DateSubmitted.ToString("MM/dd/yyyy hh:mm tt")</td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="4" style="text-align:center;color:#aaa;">No feedback submitted yet</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- RESERVATION -->
+        <div id="reservation" class="section">
+            <div class="admin-card">
+                <div class="admin-card-header">Reservations</div>
+                <div class="admin-card-body">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>ID Number</th>
+                                <th>Name</th>
+                                <th>Lab</th>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Purpose</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (reservations.Any())
+                            {
+                                foreach (var r in reservations)
+                                {
+                                    <tr>
+                                        <td>@r.IdNumber</td>
+                                        <td>@r.Name</td>
+                                        <td>@r.Lab</td>
+                                        <td>@r.ReservationDate.ToString("MM/dd/yyyy")</td>
+                                        <td>@r.ReservationTime</td>
+                                        <td>@r.Purpose</td>
+                                        <td>
+                                            <span class="@(r.Status == "Approved" ? "reservation-badge-approved" : r.Status == "Rejected" ? "reservation-badge-rejected" : "reservation-badge-pending")">
+                                                @r.Status
+                                            </span>
+                                        </td>
+                                        <td>
+                                            @if (r.Status == "Pending")
+                                            {
+                                                <form method="post" action="/Admin/ApproveReservation" style="display:inline;">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="id" value="@r.Id" />
+                                                    <button type="submit" class="btn-sitin" style="font-size:0.78rem;padding:4px 10px;">Approve</button>
+                                                </form>
+                                                <form method="post" action="/Admin/RejectReservation" style="display:inline;margin-left:4px;">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="id" value="@r.Id" />
+                                                    <button type="submit" class="btn-end" style="font-size:0.78rem;padding:4px 10px;">Reject</button>
+                                                </form>
+                                            }
+                                            else
+                                            {
+                                                <span style="color:#aaa;font-size:0.82rem;">—</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr><td colspan="8" style="text-align:center;color:#aaa;">No reservations yet</td></tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        function showSection(id, el) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        function toggleAnnouncementForm() {
+            var form = document.getElementById('announcementForm');
+            form.style.display = (form.style.display === 'none' || form.style.display === '') ? 'block' : 'none';
+        }
+
+        function searchStudent() {
+            var query = document.getElementById('searchInput').value.trim();
+            if (!query) return;
+            fetch('/Admin/SearchStudent?query=' + encodeURIComponent(query))
+                .then(res => res.json())
+                .then(data => {
+                    var tbody = document.getElementById('searchResults');
+                    if (data.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#aaa;">No student found</td></tr>';
+                        return;
+                    }
+                    tbody.innerHTML = data.map(s => `
+                        <tr>
+                            <td>${s.idNumber}</td>
+                            <td>${s.firstName} ${s.lastName}</td>
+                            <td>${s.course}</td>
+                            <td>${s.courseLvl}</td>
+                            <td>${s.email}</td>
+                            <td>${s.address}</td>
+                            <td>${s.remainingSession}</td>
+                        </tr>
+                    `).join('');
+                });
+        }
+
+        (function () {
+            var records = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+                                                    allRecords
+                                                            .GroupBy(r => r.Purpose ?? "Other")
+                                                            .Select(g => new { label = g.Key, count = g.Count() })
+                                                            .ToList()
+                                    ));
+
+        if (!records || records.length === 0) return;
+
+            var labels = records.map(r => r.label);
+            var counts = records.map(r => r.count);
+            var colors = ['#4e73df','#e74a3b','#f6c23e','#1cc88a','#36b9cc','#858796','#f8765f','#a855f7'];
+
+            var ctx = document.getElementById('purposeChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: counts,
+                        backgroundColor: colors.slice(0, labels.length),
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'top', labels: { font: { size: 11 }, boxWidth: 14 } }
+                    }
+                }
+            });
+        })();
+    </script>
+}
